@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 
 //User model
 const User = require('../models/User');
+const passport = require('passport');
 
 //Login Page
 router.get('/login', (req, res) => {
@@ -76,6 +77,7 @@ router.post('/register', (req, res) => {
                             //Save user
                             newUser.save()
                                 .then(user => {
+                                    req.flash('success_msg', 'You are now registered and can login');
                                     res.redirect('/users/login');
                                 })
                                 .catch(err => console.log(err));
@@ -85,5 +87,21 @@ router.post('/register', (req, res) => {
             .catch();
     }
 });
+
+//Login Handle
+router.post('/login', (req, res, next) => {
+    passport.authenticate('local', {
+        successRedirect: '/dashboard',
+        failureRedirect: '/users/login',
+        failureFlash: true
+    })(req, res, next);
+})
+
+//Logout
+router.get('/logout', (req, res) => {
+    req.logout();
+    req.flash('success_msg', 'You are logout !!!');
+    res.redirect('/users/login');
+})
 
 module.exports = router;
